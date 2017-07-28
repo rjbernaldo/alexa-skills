@@ -1,4 +1,5 @@
 var request = require('request');
+var login = require("facebook-chat-api");
 
 // Route the incoming request based on type (LaunchRequest, IntentRequest,
 // etc.) The JSON body of the request is provided in the event parameter.
@@ -94,19 +95,24 @@ function onSessionEnded(sessionEndedRequest, session) {
 }
 
 function handleTestRequest(intent, session, callback) {
-  request(
-    { 
-      url: 'https://api.github.com/zen',
-      headers: {
-        'User-Agent': 'request'
+  login({
+    email: FB_USERNAME,
+    password: FB_PASSWORD
+  }, function (err, api) {
+    request(
+      { 
+        url: 'https://api.github.com/zen',
+        headers: {
+          'User-Agent': 'request'
+        }
+      },
+      function (err, res, body) {
+        var speech = buildSpeechletResponseWithoutCard(body, '', 'true');
+        api.sendMessage(body, FB_THREAD_ID);
+        callback(session.attributes, speech);
       }
-    },
-    function (err, res, body) {
-      var speech = buildSpeechletResponseWithoutCard(body, '', 'true');
-
-      callback(session.attributes, speech);
-    }
-  );
+    );
+  });
 }
 
 // ------- Helper functions to build responses -------
