@@ -1,11 +1,3 @@
-/**
- 
- Copyright 2016 Brian Donohue.
- 
-*/
-
-'use strict';
-
 var request = require('request');
 
 // Route the incoming request based on type (LaunchRequest, IntentRequest,
@@ -102,8 +94,19 @@ function onSessionEnded(sessionEndedRequest, session) {
 }
 
 function handleTestRequest(intent, session, callback) {
-    callback(session.attributes,
-        buildSpeechletResponseWithoutCard("Hello, World!", "", "true"));
+  request(
+    { 
+      url: 'https://api.github.com/zen',
+      headers: {
+        'User-Agent': 'request'
+      }
+    },
+    function (err, res, body) {
+      var speech = buildSpeechletResponseWithoutCard(body, '', 'true');
+
+      callback(session.attributes, speech);
+    }
+  );
 }
 
 // ------- Helper functions to build responses -------
